@@ -28,25 +28,7 @@ public class User {
     @Column(columnDefinition = "boolean default false")
     private boolean enabled;
 
-    @Column
-    private String verificationCode;
-
-    @Column
-    private LocalDateTime verificationCodeExpiration;
-
-    @Column
-    private String resetToken;
-
-    @Column
-    private LocalDateTime resetTokenExpiration;
-
-    public void generateVerificationCode() {
-        this.verificationCode = UUID.randomUUID().toString();
-        this.verificationCodeExpiration = LocalDateTime.now().plusHours(24); // Token valid for 24 hours
-    }
-
-    public void generateResetToken() {
-        this.resetToken = UUID.randomUUID().toString();
-        this.resetTokenExpiration = LocalDateTime.now().plusHours(24); // Token valid for 24 hours
-    }
+    private boolean active;
+    private String otp;
+    private LocalDateTime otpGeneratedTime;
 }

@@ -1,11 +1,12 @@
-package org.example.wordaholic_be.dto.request;
+package org.example.wordaholic_be.dto;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class LoginRequest {
+public class LoginDto {
+
     private String email;
     private String password;
 }

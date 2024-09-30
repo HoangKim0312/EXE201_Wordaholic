@@ -1,15 +1,19 @@
 package org.example.wordaholic_be.service;
 
-import org.example.wordaholic_be.entity.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.example.wordaholic_be.dto.LoginDto;
+import org.example.wordaholic_be.dto.RegisterDto;
 
-public interface UserService extends UserDetailsService { // Now an interface
+public interface UserService {
 
-    UserDetails loadUserByUsername(String email) throws UsernameNotFoundException;
+    String register(RegisterDto registerDto);
 
-    User findUserByEmail(String email);
+    String verifyAccount(String email, String otp);
 
-    void saveUser(User user);
+    String regenerateOtp(String email);
+
+    String login(LoginDto loginDto);
+
+    String forgotPassword(String email);
+
+    String setPassword(String email, String newPassword);
 }
