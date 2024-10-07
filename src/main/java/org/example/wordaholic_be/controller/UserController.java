@@ -3,6 +3,7 @@ package org.example.wordaholic_be.controller;
 import jakarta.mail.MessagingException;
 import org.example.wordaholic_be.dto.LoginDto;
 import org.example.wordaholic_be.dto.RegisterDto;
+import org.example.wordaholic_be.dto.UserDto;
 import org.example.wordaholic_be.service.UserService;
 import org.example.wordaholic_be.util.EmailUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
+@RequestMapping("/api/users")
 public class UserController {
 
     @Autowired
@@ -42,5 +46,25 @@ public class UserController {
     @PutMapping("/set-password")
     public ResponseEntity<String> setPassword(@RequestParam String email, @RequestHeader String newPassword) {
         return new ResponseEntity<>(userService.setPassword(email, newPassword), HttpStatus.OK);
+    }
+
+    @GetMapping("/getAllUser")
+    public List<UserDto> getAllUsers() {
+        return userService.getAllUsers();
+    }
+
+    @GetMapping("/{id}")
+    public UserDto getUserById(@PathVariable Long id) {
+        return userService.getUserById(id);
+    }
+
+    @PutMapping("/update/{id}")
+    public UserDto updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
+        return userService.updateUser(id, userDto);
+    }
+
+    @PutMapping("/delete/{id}")
+    public void deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
     }
 }

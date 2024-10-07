@@ -2,6 +2,9 @@ package org.example.wordaholic_be.service;
 
 import org.example.wordaholic_be.dto.LoginDto;
 import org.example.wordaholic_be.dto.RegisterDto;
+import org.example.wordaholic_be.dto.UserDto;
+
+import java.util.List;
 
 public interface UserService {
 
@@ -16,4 +19,9 @@ public interface UserService {
     String forgotPassword(String email);
 
     String setPassword(String email, String newPassword);
+
+    List<UserDto> getAllUsers();
+    UserDto getUserById(Long id);
+    UserDto updateUser(Long id, UserDto userDto);
+    void deleteUser(Long id);
 }

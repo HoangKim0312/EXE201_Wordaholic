@@ -3,6 +3,7 @@ package org.example.wordaholic_be.service.impl;
 import jakarta.mail.MessagingException;
 import org.example.wordaholic_be.dto.LoginDto;
 import org.example.wordaholic_be.dto.RegisterDto;
+import org.example.wordaholic_be.dto.UserDto;
 import org.example.wordaholic_be.entity.User;
 import org.example.wordaholic_be.repository.UserRepository;
 import org.example.wordaholic_be.service.UserService;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -33,7 +36,7 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Unable to send otp please try again");
         }
         User user = new User();
-        user.setUsername(registerDto.getName());
+        user.setUsername(registerDto.getUsername());
         user.setEmail(registerDto.getEmail());
         user.setPassword(registerDto.getPassword());
         user.setOtp(otp);
@@ -102,5 +105,44 @@ public class UserServiceImpl implements UserService {
         user.setPassword(newPassword);
         userRepository.save(user);
         return "New password set successful";
+    }
+
+    @Override
+    public List<UserDto> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public UserDto getUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return mapToDto(user);
+    }
+
+    @Override
+    public UserDto updateUser(Long id, UserDto userDto) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setUsername(userDto.getUsername());
+        user.setEmail(userDto.getEmail());
+        user.setEnabled(userDto.isEnabled());
+        user.setActive(userDto.isActive());
+        userRepository.save(user);
+        return mapToDto(user);
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setActive(false);
+        userRepository.save(user);
+    }
+
+    private UserDto mapToDto(User user) {
+        return new UserDto(user.getUserId(), user.getUsername(), user.getEmail(), user.isEnabled(), user.isActive());
     }
 }
