@@ -81,20 +81,30 @@ public class GameServiceImpl implements GameService {
     }
 
     private WordDto getRandomWordFromAPI() {
-        String apiUrl = "https://api.datamuse.com/words?sp=*";
+        // Generate a random letter from the alphabet
+        char randomLetter = (char) ('a' + new Random().nextInt(26));
+        String apiUrl = "https://api.datamuse.com/words?sp=" + randomLetter + "*";
+
         try {
             ResponseEntity<DatamuseResponse[]> response = restTemplate.getForEntity(apiUrl, DatamuseResponse[].class);
+
+            // Check if the response is successful and contains words
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null && response.getBody().length > 0) {
                 Random random = new Random();
+
                 // Randomly pick a word from the response
                 String randomWord = response.getBody()[random.nextInt(response.getBody().length)].getWord();
-                return getWordDetails(randomWord);  // Get its definition and return
+
+                // Get its details such as definition and return the WordDto
+                return getWordDetails(randomWord);
             }
         } catch (Exception e) {
             System.out.println("Error while fetching word from API: " + e.getMessage());
         }
+
         return null;
     }
+
 
     private String getBotWordByPrefix(char lastLetter) {
         String apiUrl = "https://api.datamuse.com/words?sp=" + lastLetter + "*";
