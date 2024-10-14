@@ -3,6 +3,7 @@ package org.example.wordaholic_be.service;
 import org.example.wordaholic_be.dto.LoginDto;
 import org.example.wordaholic_be.dto.RegisterDto;
 import org.example.wordaholic_be.dto.UserDto;
+import org.example.wordaholic_be.entity.User;
 
 import java.util.List;
 
@@ -24,4 +25,5 @@ public interface UserService {
     UserDto getUserById(Long id);
     UserDto updateUser(Long id, UserDto userDto);
     void deleteUser(Long id);
+    User findUserByEmail(String email);
 }

@@ -6,5 +6,7 @@ import java.util.List;
 
 @Data
 public class DictionaryApiResponse {
-    private List<Meaning> meanings; // List of meanings
+    private String word;
+    private List<Phonetic> phonetics;
+    private List<Meaning> meanings;
 }
