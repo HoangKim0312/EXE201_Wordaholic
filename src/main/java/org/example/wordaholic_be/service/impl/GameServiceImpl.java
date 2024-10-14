@@ -1,5 +1,6 @@
 package org.example.wordaholic_be.service.impl;
 
+import org.example.wordaholic_be.Response.DatamuseResponse;
 import org.example.wordaholic_be.Response.DictionaryApiResponse;
 import org.example.wordaholic_be.Response.Meaning;
 import org.example.wordaholic_be.dto.WordDto;
@@ -80,12 +81,29 @@ public class GameServiceImpl implements GameService {
     }
 
     private WordDto getRandomWordFromAPI() {
-        String apiUrl = "https://random-word-api.herokuapp.com/word";
+        String apiUrl = "https://api.datamuse.com/words?sp=*";
         try {
-            ResponseEntity<String[]> response = restTemplate.getForEntity(apiUrl, String[].class);
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                String randomWord = response.getBody()[0];
-                return getWordDetails(randomWord);
+            ResponseEntity<DatamuseResponse[]> response = restTemplate.getForEntity(apiUrl, DatamuseResponse[].class);
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null && response.getBody().length > 0) {
+                Random random = new Random();
+                // Randomly pick a word from the response
+                String randomWord = response.getBody()[random.nextInt(response.getBody().length)].getWord();
+                return getWordDetails(randomWord);  // Get its definition and return
+            }
+        } catch (Exception e) {
+            System.out.println("Error while fetching word from API: " + e.getMessage());
+        }
+        return null;
+    }
+
+    private String getBotWordByPrefix(char lastLetter) {
+        String apiUrl = "https://api.datamuse.com/words?sp=" + lastLetter + "*";
+
+        try {
+            ResponseEntity<DatamuseResponse[]> response = restTemplate.getForEntity(apiUrl, DatamuseResponse[].class);
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null && response.getBody().length > 0) {
+                Random random = new Random();
+                return response.getBody()[random.nextInt(response.getBody().length)].getWord();
             }
         } catch (Exception e) {
             // Handle API error
@@ -93,28 +111,6 @@ public class GameServiceImpl implements GameService {
         return null;
     }
 
-    private String getBotWordByPrefix(char lastLetter) {
-        String apiUrl = "https://api.example-dictionary.com/words?prefix=" + lastLetter;
-
-        try {
-            ResponseEntity<String[]> response = restTemplate.getForEntity(apiUrl, String[].class);
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                if (response.getBody().length > 0) {
-                    Random random = new Random();
-                    String randomBotWord = response.getBody()[random.nextInt(response.getBody().length)];
-                    System.out.println("Bot word chosen: " + randomBotWord); // Debugging line
-                    return randomBotWord;
-                } else {
-                    System.out.println("No words found for prefix: " + lastLetter); // Debugging line
-                }
-            } else {
-                System.out.println("Failed to fetch words from the dictionary API. Status code: " + response.getStatusCode()); // Debugging line
-            }
-        } catch (Exception e) {
-            System.out.println("Error while fetching words: " + e.getMessage()); // Debugging line
-        }
-        return null;
-    }
 
     private WordDto getWordDetails(String word) {
         String apiUrl = "https://api.dictionaryapi.dev/api/v2/entries/en/" + word;
