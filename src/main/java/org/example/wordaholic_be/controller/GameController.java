@@ -24,7 +24,7 @@ public class GameController {
         return gameService.playTurn(email, word);
     }
     // Endpoint for bot's turn
-    @GetMapping("/api/game/bot-turn")
+    @GetMapping("/bot-turn")
     public WordDto botTurn() {
         return gameService.botTurn();
     }
