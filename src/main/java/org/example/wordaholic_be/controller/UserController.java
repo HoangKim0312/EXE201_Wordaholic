@@ -43,7 +43,7 @@ public class UserController {
     public ResponseEntity<String> forgotPassword(@RequestParam String email) {
         return new ResponseEntity<>(userService.forgotPassword(email), HttpStatus.OK);
     }
-    @PostMapping("/set-password")
+    @PutMapping("/set-password")
     public ResponseEntity<String> setPassword(@RequestParam String email, @RequestHeader String newPassword) {
         return new ResponseEntity<>(userService.setPassword(email, newPassword), HttpStatus.OK);
     }
