@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -27,8 +28,9 @@ public class UserController {
     }
 
     @PostMapping("/verify-account")
-    public ResponseEntity<String> verifyAccount(@RequestParam String email,
-                                                @RequestParam String otp) {
+    public ResponseEntity<String> verifyAccount(@RequestBody Map<String, String> requestBody) { // Get email and OTP from request body
+        String email = requestBody.get("email");
+        String otp = requestBody.get("otp");
         return new ResponseEntity<>(userService.verifyAccount(email, otp), HttpStatus.OK);
     }
     @PostMapping("/regenerate-otp")
