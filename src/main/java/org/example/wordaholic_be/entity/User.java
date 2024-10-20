@@ -37,6 +37,12 @@
         @ManyToMany(mappedBy = "players")
         private List<Room> rooms = new ArrayList<>();
 
+        @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+        private Currency currency;
+
+        @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+        private Points points;
+
         public boolean joinRoom(Room room) {
             if (rooms.isEmpty() && !room.getPlayers().contains(this)) {
                 rooms.add(room);

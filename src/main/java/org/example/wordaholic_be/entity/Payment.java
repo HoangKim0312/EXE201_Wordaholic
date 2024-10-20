@@ -35,4 +35,8 @@ public class Payment {
 
     @Column
     private String status; // e.g., "Success", "Failed", "Pending"
+
+    @ManyToOne // Many payments can belong to one shop
+    @JoinColumn(name = "shop_id") // Foreign key column in Payment table
+    private Shop shop;
 }

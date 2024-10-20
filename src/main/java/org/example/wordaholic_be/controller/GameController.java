@@ -1,7 +1,10 @@
 package org.example.wordaholic_be.controller;
 
+import org.example.wordaholic_be.Response.PointsResponseDto;
 import org.example.wordaholic_be.dto.WordDto;
+import org.example.wordaholic_be.entity.Points;
 import org.example.wordaholic_be.service.GameService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -27,5 +30,19 @@ public class GameController {
     @GetMapping("/bot-turn")
     public WordDto botTurn() {
         return gameService.botTurn();
+    }
+
+    @PostMapping("/end")
+    public WordDto endGame(@RequestParam String email) {
+        return gameService.endGame(email);
+    }
+
+    @GetMapping("/checkPoints")
+    public ResponseEntity<PointsResponseDto> checkPoints(@RequestParam String email) {
+        PointsResponseDto userPoints = gameService.checkPoints(email);
+        if (userPoints == null) {
+            return ResponseEntity.notFound().build(); // User not found
+        }
+        return ResponseEntity.ok(userPoints); // Return the user's points
     }
 }
