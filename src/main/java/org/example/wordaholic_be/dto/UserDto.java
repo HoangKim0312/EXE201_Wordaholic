@@ -11,4 +11,6 @@ public class UserDto {
     private String email;
     private boolean enabled;
     private boolean active;
+    private Integer totalPoints;  // Allow null
+    private Integer totalCurrency;  // Allow null
 }

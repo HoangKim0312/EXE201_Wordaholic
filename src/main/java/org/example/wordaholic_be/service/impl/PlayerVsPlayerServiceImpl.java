@@ -37,7 +37,7 @@ public class PlayerVsPlayerServiceImpl implements PlayerVsPlayerService {
         User player2 = userService.findUserByEmail(player2Email);
 
         if (player1 == null || player2 == null) {
-            return new WordDto(null, "One or both players not found!");
+            return new WordDto(null, "One or both players not found!", null);
         }
 
         // Store player emails
@@ -49,18 +49,18 @@ public class PlayerVsPlayerServiceImpl implements PlayerVsPlayerService {
 
         // Start the game with a random word
         currentWord = getRandomWordFromAPI();
-        return currentWord != null ? currentWord : new WordDto(null, "Error fetching a word from the dictionary API.");
+        return currentWord != null ? currentWord : new WordDto(null, "Error fetching a word from the dictionary API.", null);
     }
 
     @Override
     public WordDto playerTurn(String email, String word) {
         if (currentWord == null) {
-            return new WordDto(null, "Game has not started. Please call the start API.");
+            return new WordDto(null, "Game has not started. Please call the start API.", null);
         }
 
         // Check if it's the current player's turn
         if (!email.equals(currentPlayer)) {
-            return new WordDto(null, "It's not your turn! Please wait.");
+            return new WordDto(null, "It's not your turn! Please wait.", null);
         }
 
         word = word.toLowerCase();
@@ -72,12 +72,12 @@ public class PlayerVsPlayerServiceImpl implements PlayerVsPlayerService {
                 currentWord = playerWordDetails; // Update current word to player's word
                 // Switch turn to the other player
                 currentPlayer = getOpponent(email);
-                return playerWordDetails; // Return player's word and its definition
+                return new WordDto(playerWordDetails.getWord(), playerWordDetails.getDefinition(), "The game is still ongoing.");
             } else {
-                return new WordDto(null, "Invalid word! Please try again.");
+                return new WordDto(null, "Invalid word! Please try again.", null);
             }
         } else {
-            return new WordDto(null, "Invalid word! Your word must start with '" + lastLetter + "'. You lost!");
+            return new WordDto(null, null, "Invalid word! Your word must start with '" + lastLetter + "'. You lost!");
         }
     }
 
@@ -113,7 +113,7 @@ public class PlayerVsPlayerServiceImpl implements PlayerVsPlayerService {
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 DictionaryApiResponse[] apiResponse = response.getBody();
                 String definition = extractMeaning(apiResponse[0]);
-                return new WordDto(word, definition);
+                return new WordDto(word, definition, null); // Set definition and return
             }
         } catch (Exception e) {
             // Handle API error

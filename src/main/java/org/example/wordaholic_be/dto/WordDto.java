@@ -10,4 +10,5 @@ import lombok.Setter;
 public class WordDto {
     private String word;
     private String definition;
+    private String gameStatus;
 }
