@@ -26,4 +26,6 @@ public interface UserService {
     UserDto updateUser(Long id, UserDto userDto);
     void deleteUser(Long id);
     User findUserByEmail(String email);
+    void updateUserCoins(Long userId, int coinsToAdd);
+    User findUserById(Long userId);
 }
