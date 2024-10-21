@@ -45,6 +45,9 @@
         @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
         private Points points;
 
+        @Column(nullable = false)
+        private Integer coins = 0;
+
         public boolean joinRoom(Room room) {
             if (rooms.isEmpty() && !room.getPlayers().contains(this)) {
                 rooms.add(room);

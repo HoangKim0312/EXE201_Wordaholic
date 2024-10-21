@@ -55,6 +55,7 @@ public class UserServiceImpl implements UserService {
         user.setOtpGeneratedTime(LocalDateTime.now());
         user.setEnabled(false); // Set default enabled value
         user.setActive(false); // Set default active value
+        user.setCoins(0);
         userRepository.save(user);
 
         // Create and save currency for the new user
@@ -215,5 +216,18 @@ public class UserServiceImpl implements UserService {
     public User findUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found with this email: " + email));
+    }
+    @Override
+    public User findUserById(Long userId) {
+        return userRepository.findById(userId).orElse(null);
+    }
+
+    @Override
+    public void updateUserCoins(Long userId, int coinsToAdd) {
+        User user = findUserById(userId);
+        if (user != null) {
+            user.setCoins(user.getCoins() + coinsToAdd);
+            userRepository.save(user);
+        }
     }
 }
