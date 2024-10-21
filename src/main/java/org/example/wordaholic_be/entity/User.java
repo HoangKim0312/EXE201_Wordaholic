@@ -44,12 +44,19 @@
         private Points points;
 
         public boolean joinRoom(Room room) {
-            if (rooms.isEmpty() && !room.getPlayers().contains(this)) {
+            // If the user is already in a room, prevent them from joining another room
+            if (!rooms.isEmpty()) {
+                return false; // The user is already in a room
+            }
+
+            // Check if the room has space and the user isn't already in this room
+            if (room.canJoin(this)) {
                 rooms.add(room);
                 room.getPlayers().add(this);
                 return true; // Successfully joined the room
             }
-            return false; // Failed to join (already in a room or already in the room)
+
+            return false; // Room is full or the user is already in this room
         }
 
         // Method to leave a room
