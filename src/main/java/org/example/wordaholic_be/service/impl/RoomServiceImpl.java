@@ -1,7 +1,8 @@
 package org.example.wordaholic_be.service.impl;
 
-import org.example.wordaholic_be.dto.RoomCreateDto;
+import org.example.wordaholic_be.dto.CreateRoomDto;
 import org.example.wordaholic_be.dto.RoomDto;
+import org.example.wordaholic_be.dto.UpdateRoomStatusDto;
 import org.example.wordaholic_be.entity.Room;
 import org.example.wordaholic_be.entity.User;
 import org.example.wordaholic_be.repository.RoomRepository;
@@ -10,8 +11,9 @@ import org.example.wordaholic_be.service.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Service
+import java.util.stream.Collectors;
 
+@Service
 public class RoomServiceImpl implements RoomService {
 
     @Autowired
@@ -21,69 +23,74 @@ public class RoomServiceImpl implements RoomService {
     private UserRepository userRepository;
 
     @Override
-    public RoomDto createRoom(RoomCreateDto roomCreateDto) {
+    public RoomDto createRoom(CreateRoomDto roomDto) {
         Room room = new Room();
-        room.setRoomName(roomCreateDto.getRoomName());
-        room.setMaxPlayers(roomCreateDto.getMaxPlayers());
+        room.setRoomId(Room.generateRandomRoomId());
+        room.setRoomName(roomDto.getRoomName());
+        room.setMaxPlayers(roomDto.getMaxPlayers());
+        room.setTimeLimit(roomDto.getTimeLimit());
+        room.setCurrentPlayerIndex(0);
         room.setGameInProgress(false);
-        room.setTimeLimit(roomCreateDto.getTimeLimit());
         roomRepository.save(room);
-        return new RoomDto(room);
+
+        return mapToRoomDto(room);
     }
 
     @Override
-    public void deleteRoom(Long roomId) {
+    public void deleteRoom(String roomId) {
         roomRepository.deleteById(roomId);
     }
 
     @Override
-    public RoomDto addPlayerToRoom(Long roomId, Long userId) {
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new RuntimeException("Room not found"));
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public RoomDto addPlayerToRoom(String roomId, String userEmail) {
+        Room room = roomRepository.findById(roomId).orElseThrow(() -> new RuntimeException("Room not found"));
+        User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Check if user is already in another room
-        if (!user.getRooms().isEmpty()) {  // Assuming getRooms() returns the list of rooms the user is in
-            throw new RuntimeException(user.getUsername() + " is already in another room.");
+        // Check if the user is already in another room
+        if (!user.getRooms().isEmpty()) {
+            throw new RuntimeException("User is already in another room");
         }
 
-        // Check if the user is already a player in this room
-        if (room.getPlayers().contains(user)) {
-            throw new RuntimeException(user.getUsername() + " is already a player in this room.");
-        }
-
-        room.getPlayers().add(user);
-        user.getRooms().add(room); // Ensure to add the room to the user's list of rooms
-        roomRepository.save(room);
-        userRepository.save(user); // Save the user as well
-        return new RoomDto(room);
-    }
-
-    @Override
-    public RoomDto removePlayerFromRoom(Long roomId, Long userId) {
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new RuntimeException("Room not found"));
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        if (room.getPlayers().remove(user)) {
-            user.getRooms().remove(room); // Remove room from user's list
+        // If the user can join, proceed with adding them to the room
+        if (room.canJoin(user)) {
+            user.joinRoom(room);
             roomRepository.save(room);
-            userRepository.save(user); // Save updated user
         } else {
-            throw new RuntimeException(user.getUsername() + " is not a player in room: " + room.getRoomName());
+            throw new RuntimeException("Room is full or user already in the room");
         }
-        return new RoomDto(room);
+
+        return mapToRoomDto(room);
     }
 
     @Override
-    public RoomDto changeGameStatus(Long roomId, boolean isPlaying) {
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new RuntimeException("Room not found"));
+    public RoomDto removePlayerFromRoom(String roomId, String userEmail) {
+        Room room = roomRepository.findById(roomId).orElseThrow(() -> new RuntimeException("Room not found"));
+        User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new RuntimeException("User not found"));
 
-        room.setGameInProgress(isPlaying);
+        user.leaveRoom(room);
         roomRepository.save(room);
-        return new RoomDto(room);
+
+        return mapToRoomDto(room);
+    }
+
+    @Override
+    public RoomDto changeRoomStatus(String roomId, UpdateRoomStatusDto statusDto) {
+        Room room = roomRepository.findById(roomId).orElseThrow(() -> new RuntimeException("Room not found"));
+        room.setGameInProgress(statusDto.isGameInProgress());
+        roomRepository.save(room);
+
+        return mapToRoomDto(room);
+    }
+
+    private RoomDto mapToRoomDto(Room room) {
+        RoomDto roomDto = new RoomDto();
+        roomDto.setRoomId(room.getRoomId());
+        roomDto.setRoomName(room.getRoomName());
+        roomDto.setMaxPlayers(room.getMaxPlayers());
+        roomDto.setGameInProgress(room.isGameInProgress());
+        roomDto.setCurrentPlayerIndex(room.getCurrentPlayerIndex());
+        roomDto.setTimeLimit(room.getTimeLimit());
+        roomDto.setPlayersEmails(room.getPlayers().stream().map(User::getEmail).collect(Collectors.toList()));
+        return roomDto;
     }
 }
