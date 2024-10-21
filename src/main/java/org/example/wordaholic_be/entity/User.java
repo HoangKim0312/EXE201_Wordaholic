@@ -33,6 +33,8 @@
         private boolean active;
         private String otp;
         private LocalDateTime otpGeneratedTime;
+        private String resetToken;
+        private LocalDateTime resetTokenExpiration;
 
         @ManyToMany(mappedBy = "players")
         private List<Room> rooms = new ArrayList<>();

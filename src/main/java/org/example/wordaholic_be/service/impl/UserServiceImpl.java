@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -115,26 +116,42 @@ public class UserServiceImpl implements UserService {
         }
         return "Login successful";
     }
-    public String forgotPassword(String email){
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(
-                        () -> new RuntimeException("User not found with this email: " + email));
-        try{
-            emailUtil.sendSetPasswordEmail(email);
+    @Override
+    public String forgotPassword(String email) {
+        User user = findUserByEmail(email);
+
+        String token = UUID.randomUUID().toString();
+        user.setResetToken(token);
+        user.setResetTokenExpiration(LocalDateTime.now().plusHours(1)); // Example: 1-hour expiration
+        userRepository.save(user);
+
+        String resetLink = "http://localhost:8080/api/users/reset-password?token=" + token;
+        try {
+            emailUtil.sendPasswordResetEmail(email, resetLink);
         } catch (MessagingException e) {
-            throw new RuntimeException("Unable to send reset password email");
+            throw new RuntimeException(e);
         }
-        return "Please check your email to reset password";
+
+        return "Password reset email sent! (Check your inbox/spam)";
     }
 
-    public String setPassword(String email, String newPassword){
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(
-                        () -> new RuntimeException("User not found with this email: " + email));
+    @Override
+    public String resetPassword(String token, String newPassword) {
+        User user = userRepository.findByResetToken(token)
+                .orElseThrow(() -> new RuntimeException("Invalid or expired token"));
+
+        if (user.getResetTokenExpiration().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Token has expired");
+        }
+
         user.setPassword(newPassword);
+        user.setResetToken(null);
+        user.setResetTokenExpiration(null);
         userRepository.save(user);
-        return "New password set successful";
+
+        return "Password reset successful!";
     }
+
 
     @Override
     public List<UserDto> getAllUsers() {

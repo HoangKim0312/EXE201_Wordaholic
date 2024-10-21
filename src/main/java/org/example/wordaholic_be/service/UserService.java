@@ -19,7 +19,7 @@ public interface UserService {
 
     String forgotPassword(String email);
 
-    String setPassword(String email, String newPassword);
+    String resetPassword(String token, String newPassword);
 
     List<UserDto> getAllUsers();
     UserDto getUserById(Long id);
