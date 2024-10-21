@@ -55,22 +55,24 @@ public class UserServiceImpl implements UserService {
         user.setOtpGeneratedTime(LocalDateTime.now());
         user.setEnabled(false); // Set default enabled value
         user.setActive(false); // Set default active value
-        user.setCoins(0);
+        user.setCoins(50); // Set initial coins to 50 instead of 0
         userRepository.save(user);
 
         // Create and save currency for the new user
         Currency currency = new Currency();
-        currency.setTotalCurrency(50);  // Assign 100 coins
-        currency.setCurrencyName("Coins");      // Set currency name
-        currency.setUser(user);           // Link the currency to the newly created user
-        user.setCurrency(currency);        // Set the currency in the user
+        currency.setTotalCurrency(50);  // Assign 50 coins
+        currency.setCurrencyName("Coins"); // Set currency name
+        currency.setUser(user); // Link the currency to the newly created user
         currencyRepository.save(currency); // Save the currency entry
 
+        // Set the currency in the user
+        user.setCurrency(currency); // Set the currency in the user
+        userRepository.save(user); // Make sure to save user again to update the link
+
+        // Initialize points to 0
         Points points = new Points();
         points.setTotalPoints(0); // Initialize points to 0
         points.setUser(user); // Link the points to the newly created user
-        user.setPoints(points); // Set the points in the user entity
-
         pointsRepository.save(points); // Save the points entry
 
         return "User registration successful. An OTP has been sent to your email.";
